@@ -1,0 +1,20 @@
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/8.3/phpunit.xsd"
+         forceCoversAnnotation="false"
+         verbose="true"
+         colors="true">
+    <php>
+        <env name="APP_ENV" value="test"/>
+    </php>
+    <testsuite name="Unit">
+        <directory>tests</directory>
+    </testsuite>
+    <filter>
+        <whitelist>
+            <directory>src</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="tests/coverage" />
+    </logging>
+</phpunit>
