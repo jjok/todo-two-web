@@ -56,7 +56,9 @@ final class CreateTaskRequest
     }
 }
 
-$dataDir = __DIR__ . '/../data/';
+//$dataDir = __DIR__ . '/../data/';
+//TODO make this configurable
+$dataDir = '/data/';
 if(isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'test') {
     $dataDir = __DIR__ . '/../tests/data/';
 }
@@ -109,12 +111,12 @@ return function (App $app) use ($eventStore, $projection, $getTaskById) {
 
     $app->patch('/tasks/{id}', function(Request $request, Response $response) use ($eventStore, $getTaskById) {
         try {
-            $renameTask = new RenameTask($eventStore, $getTaskById);
-//            $changeTaskPriority = new ChangeTaskPriority($eventStore, $getTaskById);
-
-            $renameTaskRequest = RenameTaskRequest::fromPsr7($request);
-
-            $renameTask->execute($renameTaskRequest->id(), $renameTaskRequest->newName());
+//            $renameTask = new RenameTask($eventStore, $getTaskById);
+////            $changeTaskPriority = new ChangeTaskPriority($eventStore, $getTaskById);
+//
+//            $renameTaskRequest = RenameTaskRequest::fromPsr7($request);
+//
+//            $renameTask->execute($renameTaskRequest->id(), $renameTaskRequest->newName());
         }
         catch (Throwable $e) {
             //TODO Error response
