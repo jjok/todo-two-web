@@ -126,7 +126,9 @@ final class ApiTest extends TestCase
 
         $response = $this->app->handle($request);
 
-        $this->assertSame($expectedTasks, json_decode((string) $response->getBody(), true));
+        $responseBody = json_decode((string) $response->getBody(), true);
+
+        $this->assertSame($expectedTasks, $responseBody['data']);
     }
 
     private function createTaskRequest(string $id, string $name, int $priority) : Request

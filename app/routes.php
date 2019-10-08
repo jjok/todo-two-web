@@ -56,11 +56,32 @@ final class CreateTaskRequest
     }
 }
 
-//$dataDir = __DIR__ . '/../data/';
-//TODO make this configurable
-$dataDir = '/data/';
-if(isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'test') {
-    $dataDir = __DIR__ . '/../tests/data/';
+
+final class AllTasks implements \JsonSerializable
+{
+    public  function __construct(jjok\TodoTwo\Domain\Task\Projections\AllTasksStorage $projection)
+    {
+        $this->projection = $projection;
+    }
+
+    private $projection;
+
+    public function jsonSerialize() : array
+    {
+        return array(
+            'data' => array_values($this->projection->load()),
+        );
+    }
+}
+
+$dataDir = __DIR__ . '/../data/';
+if(isset($_ENV['APP_ENV'])) {
+    if($_ENV['APP_ENV'] === 'hassio') {
+        $dataDir = '/data/';
+    }
+    elseif($_ENV['APP_ENV'] === 'test') {
+        $dataDir = __DIR__ . '/../tests/data/';
+    }
 }
 
 $eventStoreFileName = $dataDir . 'events.dat';
@@ -68,6 +89,7 @@ $eventStoreFile = new SplFileObject($eventStoreFileName, 'a+');
 
 $allTasksProjectionFileName = $dataDir . 'tasks.json';
 $projection = new AllTasksStorage($allTasksProjectionFileName);
+$allTasks = new AllTasks($projection);
 
 $eventStore = new ProjectionBuildingEventStore(
     new EventStore($eventStoreFile),
@@ -77,7 +99,8 @@ $eventStore = new ProjectionBuildingEventStore(
 $eventStream = new EventStream($eventStoreFile);
 $getTaskById = new GetTaskById($eventStream);
 
-return function (App $app) use ($eventStore, $projection, $getTaskById) {
+
+return function (App $app) use ($eventStore, $allTasks, $getTaskById) {
 //    $container = $app->getContainer();
 
 //    $app->get('/', function (Request $request, Response $response) {
@@ -85,8 +108,8 @@ return function (App $app) use ($eventStore, $projection, $getTaskById) {
 //        return $response;
 //    });
 
-    $app->get('/tasks', function(Request $request, Response $response) use ($projection) {
-        $response->getBody()->write(json_encode(array_values($projection->load())));
+    $app->get('/tasks', function(Request $request, Response $response) use ($allTasks) {
+        $response->getBody()->write(json_encode($allTasks));
 
         return $response->withHeader('Content-type', 'application/json');
     });
@@ -132,10 +155,13 @@ return function (App $app) use ($eventStore, $projection, $getTaskById) {
 
         $body = json_decode((string) $request->getBody(), true);
 
-//        print_r($body);
-//        print_r($request->getAttribute('id'));
-
-        $completeTask->execute((string) $request->getAttribute('id'), (string) $body['by']);
+        try {
+            $completeTask->execute((string) $request->getAttribute('id'), (string) $body['by']);
+        }
+        catch (Throwable $e) {
+            //TODO Error response
+            $response = $response->withStatus(500);
+        }
 
         return $response;
     });
