@@ -3,20 +3,13 @@
 //use App\Application\Actions\User\ListUsersAction;
 //use App\Application\Actions\User\ViewUserAction;
 use jjok\TodoTwo\Domain\ProjectionBuildingEventStore;
-use jjok\TodoTwo\Domain\Task\Commands\ChangeTaskPriority;
 use jjok\TodoTwo\Domain\Task\Commands\CompleteTask;
-use jjok\TodoTwo\Domain\Task\Commands\RenameTask;
-use jjok\TodoTwo\Domain\Task\Projections\AllTasksProjector;
+use jjok\TodoTwo\Domain\Task\Commands\CreateTask;
 use jjok\TodoTwo\Domain\Task\Query\GetById as GetTaskById;
-use jjok\TodoTwo\Infrastructure\File\AllTasksStorage;
-use jjok\TodoTwo\Infrastructure\File\EventStream;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 //use Slim\Interfaces\RouteCollectorProxyInterface as Group;
-
-use jjok\TodoTwo\Domain\Task\Commands\CreateTask;
-use jjok\TodoTwo\Infrastructure\File\EventStore;
 
 final class CreateTaskRequest
 {
@@ -74,30 +67,13 @@ final class AllTasks implements \JsonSerializable
     }
 }
 
-$dataDir = __DIR__ . '/../data/';
-if(isset($_ENV['APP_ENV'])) {
-    if($_ENV['APP_ENV'] === 'hassio') {
-        $dataDir = '/data/';
-    }
-    elseif($_ENV['APP_ENV'] === 'test') {
-        $dataDir = __DIR__ . '/../tests/data/';
-    }
-}
 
-$eventStoreFileName = $dataDir . 'events.dat';
-$eventStoreFile = new SplFileObject($eventStoreFileName, 'a+');
 
-$allTasksProjectionFileName = $dataDir . 'tasks.json';
-$projection = new AllTasksStorage($allTasksProjectionFileName);
-$allTasks = new AllTasks($projection);
+$injector = require __DIR__ . '/dependencies.php';
 
-$eventStore = new ProjectionBuildingEventStore(
-    new EventStore($eventStoreFile),
-    new AllTasksProjector($projection)
-);
-
-$eventStream = new EventStream($eventStoreFile);
-$getTaskById = new GetTaskById($eventStream);
+$eventStore = $injector->make(ProjectionBuildingEventStore::class);
+$getTaskById = $injector->make(GetTaskById::class);
+$allTasks = $injector->make(AllTasks::class);
 
 
 return function (App $app) use ($eventStore, $allTasks, $getTaskById) {
