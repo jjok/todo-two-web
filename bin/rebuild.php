@@ -11,13 +11,13 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $injector = require __DIR__ . '/../app/dependencies.php';
 
-$eventStream = $injector->make(EventStream::class);
-$projector = $injector->make(AllTasksProjector::class);
-
 $dataDir = dataDir($_ENV);
 $allTasksProjectionFileName = $dataDir . 'tasks.json';
 
-unlink($allTasksProjectionFileName);
+file_put_contents($allTasksProjectionFileName, '');
+
+$eventStream = $injector->make(EventStream::class);
+$projector = $injector->make(AllTasksProjector::class);
 
 
 $projector->apply($eventStream->all());
