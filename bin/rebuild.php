@@ -17,7 +17,13 @@ try {
 
     $projector->rebuild($eventStream);
 
-    fwrite(STDOUT, 'Tasks projection rebuilt.' .PHP_EOL);
+    //TODO This better. Use projection version or something.
+    $count = 0;
+    foreach ($eventStream->all() as $event) {
+        $count++;
+    }
+
+    fwrite(STDOUT, sprintf('Tasks projection rebuilt. %u events applied.' .PHP_EOL, $count));
 }
 catch (Throwable $e) {
     fwrite(STDERR, $e);
