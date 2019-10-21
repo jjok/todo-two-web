@@ -32,14 +32,12 @@ use jjok\TodoTwo\Domain\Task\Projections\AllTasksProjector;
 use jjok\TodoTwo\Infrastructure\File\AllTasksStorage;
 use jjok\TodoTwo\Infrastructure\File\EventStore;
 
-function dataDir(array $env) : string {
-    if(isset($env['APP_ENV'])) {
-        if($env['APP_ENV'] === 'hassio') {
-            return '/data/';
-        }
-        if($env['APP_ENV'] === 'test') {
-            return __DIR__ . '/../tests/data/';
-        }
+function dataDir(string $env) : string {
+    if($env === 'hassio') {
+        return '/data/';
+    }
+    if($env === 'test') {
+        return __DIR__ . '/../tests/data/';
     }
 
     return __DIR__ . '/../data/';
@@ -48,14 +46,14 @@ function dataDir(array $env) : string {
 $injector = new Auryn\Injector();
 
 $injector->delegate(\SplFileObject::class, function() {
-    $dataDir = dataDir($_ENV);
+    $dataDir = dataDir((string) getenv('APP_ENV'));
     $eventStoreFileName = $dataDir . 'events.dat';
 
     return new SplFileObject($eventStoreFileName, 'a+');
 });
 $injector->share(\SplFileObject::class);
 
-$dataDir = dataDir($_ENV);
+$dataDir = dataDir((string) getenv('APP_ENV'));
 $eventStoreFile = $injector->make(\SplFileObject::class);
 
 $allTasksProjectionFileName = $dataDir . 'tasks.json';
