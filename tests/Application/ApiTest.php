@@ -54,6 +54,7 @@ final class ApiTest extends TestCase
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
             'name' => 'New task',
             'priority' => 50,
+            'currentPriority' => 'high',
             'lastCompletedAt' => null,
             'lastCompletedBy' => null,
         )]);
@@ -67,12 +68,14 @@ final class ApiTest extends TestCase
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
             'name' => 'New task',
             'priority' => 50,
+            'currentPriority' => 'high',
             'lastCompletedAt' => null,
             'lastCompletedBy' => null,
         ), array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
             'name' => 'New task 2',
             'priority' => 30,
+            'currentPriority' => 'high',
             'lastCompletedAt' => null,
             'lastCompletedBy' => null,
         )]);
@@ -88,12 +91,14 @@ final class ApiTest extends TestCase
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
             'name' => 'New task',
             'priority' => 50,
+            'currentPriority' => 'high',
             'lastCompletedAt' => null,
             'lastCompletedBy' => null,
         ), array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
             'name' => 'New task 2',
             'priority' => 30,
+            'currentPriority' => 'high',
             'lastCompletedAt' => $time1, //FIXME Dubious
             'lastCompletedBy' => 'Jonathan',
         )]);
@@ -109,12 +114,14 @@ final class ApiTest extends TestCase
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
             'name' => 'New task',
             'priority' => 50,
+            'currentPriority' => 'high',
             'lastCompletedAt' => $time2, //FIXME Dubious
             'lastCompletedBy' => 'Someone Else',
         ), array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
             'name' => 'New task 2',
             'priority' => 30,
+            'currentPriority' => 'high',
             'lastCompletedAt' => $time1, //FIXME Dubious
             'lastCompletedBy' => 'Jonathan',
         )]);
@@ -128,7 +135,17 @@ final class ApiTest extends TestCase
 
         $responseBody = json_decode((string) $response->getBody(), true);
 
-        $this->assertSame($expectedTasks, $responseBody['data']);
+        $actualTasks = $responseBody['data'];
+
+        $this->assertCount(count($expectedTasks), $actualTasks);
+        foreach ($actualTasks as $n => $task) {
+            $this->assertSame($expectedTasks[$n]['id']      , $task['id']);
+            $this->assertSame($expectedTasks[$n]['name']    , $task['name']);
+            $this->assertSame($expectedTasks[$n]['priority'], $task['priority']);
+            $this->assertSame($expectedTasks[$n]['currentPriority'], $task['currentPriority']);
+            $this->assertSame($expectedTasks[$n]['lastCompletedAt'], $task['lastCompletedAt']);
+            $this->assertSame($expectedTasks[$n]['lastCompletedBy'], $task['lastCompletedBy']);
+        }
     }
 
     private function createTaskRequest(string $id, string $name, int $priority) : Request
