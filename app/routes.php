@@ -66,25 +66,38 @@ final class AllTasks implements \JsonSerializable
 
     public function jsonSerialize() : array
     {
+        $tasks = array_map(
+            [$this, 'formatTask'],
+            array_values($this->projection->load())
+        );
+
+        usort($tasks, static function(array $a, array $b) : int {
+            return $a['currentPriorityValue'] <=> $b['currentPriorityValue'];
+        });
+
         return array(
-            'data' => array_map(
-                [$this, 'formatTask'],
-                array_values($this->projection->load())
-            ),
+            'data' => array_map(static function(array $task) : array {
+                unset($task['currentPriorityValue']);
+
+                return $task;
+            }, $tasks),
         );
     }
 
     private function formatTask(array $task) : array
     {
+        $calculatedPriority = $this->priorityCalculator->priorityAt(
+            $this->now,
+            $task['lastCompletedAt'] === null ? null : \DateTimeImmutable::createFromFormat('U', (string) $task['lastCompletedAt']),
+            $task['priority']
+        );
+
         return array(
             'id' => $task['id'],
             'name' => $task['name'],
             'priority' => $task['priority'],
-            'currentPriority' => $this->priorityCalculator->priorityAt(
-                $this->now,
-                $task['lastCompletedAt'] === null ? null : \DateTimeImmutable::createFromFormat('U', (string) $task['lastCompletedAt']),
-                $task['priority']
-            )->toString(),
+            'currentPriority' => $calculatedPriority->toString(),
+            'currentPriorityValue' => $calculatedPriority->toFloat(),
             'lastCompletedAt' => $task['lastCompletedAt'],
 //            'lastCompletedBy' => $task['lastCompletedBy'],
         );

@@ -43,10 +43,7 @@ final class ApiTest extends TestCase
     {
         $this->assertTasksEqual([]);
 
-        $response = $this->app->handle(
-            $this->createTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e8', 'New task', 50)
-        );
-        $this->assertSame(201, $response->getStatusCode());
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e8', 'New task', 50);
 
         $this->assertTasksEqual([array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
@@ -57,22 +54,19 @@ final class ApiTest extends TestCase
 //            'lastCompletedBy' => null,
         )]);
 
-        $response = $this->app->handle(
-            $this->createTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e9', 'New task 2', 30)
-        );
-        $this->assertSame(201, $response->getStatusCode());
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e9', 'New task 2', 60);
 
-        $this->assertTasksEqual([array(
-            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
-            'name' => 'New task',
-            'priority' => 50,
+        $this->assertTasksEqual([ array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
+            'name' => 'New task 2',
+            'priority' => 60,
             'currentPriority' => 'high',
             'lastCompletedAt' => null,
 //            'lastCompletedBy' => null,
         ), array(
-            'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
-            'name' => 'New task 2',
-            'priority' => 30,
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'New task',
+            'priority' => 50,
             'currentPriority' => 'high',
             'lastCompletedAt' => null,
 //            'lastCompletedBy' => null,
@@ -95,7 +89,7 @@ final class ApiTest extends TestCase
         ), array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
             'name' => 'New task 2',
-            'priority' => 30,
+            'priority' => 60,
             'currentPriority' => 'low',
             'lastCompletedAt' => $time1, //FIXME Dubious
 //            'lastCompletedBy' => 'Jonathan',
@@ -109,20 +103,28 @@ final class ApiTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
 
         $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
+            'name' => 'New task 2',
+            'priority' => 60,
+            'currentPriority' => 'low',
+            'lastCompletedAt' => $time1, //FIXME Dubious
+//            'lastCompletedBy' => 'Jonathan',
+        ), array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
             'name' => 'New task',
             'priority' => 50,
             'currentPriority' => 'low',
             'lastCompletedAt' => $time2, //FIXME Dubious
 //            'lastCompletedBy' => 'Someone Else',
-        ), array(
-            'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
-            'name' => 'New task 2',
-            'priority' => 30,
-            'currentPriority' => 'low',
-            'lastCompletedAt' => $time1, //FIXME Dubious
-//            'lastCompletedBy' => 'Jonathan',
         )]);
+    }
+
+    private function createTask(string $id, string $name, int $priority) : void
+    {
+        $response = $this->app->handle(
+            $this->createTaskRequest($id, $name, $priority)
+        );
+        $this->assertSame(201, $response->getStatusCode());
     }
 
     private function assertTasksEqual(array $expectedTasks) : void
