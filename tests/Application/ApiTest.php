@@ -14,20 +14,18 @@ final class ApiTest extends TestCase
     {
         parent::setUp();
 
-        $app = AppFactory::create();
+        $this->app = AppFactory::create();
 
-        $app->addRoutingMiddleware();
+        $this->app->addRoutingMiddleware();
 
         $routes = require __DIR__ . '/../../app/routes.php';
-        $routes($app);
+        $routes($this->app);
 
-        $this->app = $app;
-
-        touch(__DIR__ . '/../data/events.dat');
-        touch(__DIR__ . '/../data/tasks.json');
-
-        file_put_contents(__DIR__ . '/../data/events.dat', '');
-        file_put_contents(__DIR__ . '/../data/tasks.json', '');
+//        touch(__DIR__ . '/../data/events.dat');
+//        touch(__DIR__ . '/../data/tasks.json');
+//
+//        file_put_contents(__DIR__ . '/../data/events.dat', '');
+//        file_put_contents(__DIR__ . '/../data/tasks.json', '');
     }
 
     private $app;
@@ -98,7 +96,7 @@ final class ApiTest extends TestCase
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
             'name' => 'New task 2',
             'priority' => 30,
-            'currentPriority' => 'high',
+            'currentPriority' => 'low',
             'lastCompletedAt' => $time1, //FIXME Dubious
             'lastCompletedBy' => 'Jonathan',
         )]);
@@ -114,14 +112,14 @@ final class ApiTest extends TestCase
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
             'name' => 'New task',
             'priority' => 50,
-            'currentPriority' => 'high',
+            'currentPriority' => 'low',
             'lastCompletedAt' => $time2, //FIXME Dubious
             'lastCompletedBy' => 'Someone Else',
         ), array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
             'name' => 'New task 2',
             'priority' => 30,
-            'currentPriority' => 'high',
+            'currentPriority' => 'low',
             'lastCompletedAt' => $time1, //FIXME Dubious
             'lastCompletedBy' => 'Jonathan',
         )]);
@@ -166,7 +164,7 @@ final class ApiTest extends TestCase
         return $request;
     }
 
-    protected function createRequest(
+    private function createRequest(
         string $method,
         string $path,
         array $headers = ['HTTP_ACCEPT' => 'application/json'],

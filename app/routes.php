@@ -54,12 +54,15 @@ final class AllTasks implements \JsonSerializable
 {
     public  function __construct(
         jjok\TodoTwo\Domain\Task\Projections\AllTasksStorage $projection,
+        \App\Domain\PriorityCalculator $priorityCalculator,
         DateTimeImmutable $now
     ) {
         $this->projection = $projection;
+        $this->priorityCalculator = $priorityCalculator;
+        $this->now = $now;
     }
 
-    private $projection;
+    private $projection, $priorityCalculator, $now;
 
     public function jsonSerialize() : array
     {
@@ -77,7 +80,11 @@ final class AllTasks implements \JsonSerializable
             'id' => $task['id'],
             'name' => $task['name'],
             'priority' => $task['priority'],
-            'currentPriority' => 'high',
+            'currentPriority' => $this->priorityCalculator->priorityAt(
+                $this->now,
+                $task['lastCompletedAt'] === null ? null : \DateTimeImmutable::createFromFormat('U', (string) $task['lastCompletedAt']),
+                $task['priority']
+            )->toString(),
 //                    'lastCompleted' => array(
 //                        'at' => $task['lastCompletedAt'],
 //                        'by' => $task['lastCompletedBy'],
@@ -86,24 +93,6 @@ final class AllTasks implements \JsonSerializable
             'lastCompletedBy' => $task['lastCompletedBy'],
         );
     }
-
-//    public function priorityAt(DateTime $time) : float
-//    {
-//        if($this->lastCompleted instanceof NotYetCompleted) {
-//            return -1 * $this->priority->toInt();
-//        }
-//
-//        $last_completed_at = $this->timeOfLastCompletion('U') * 1000;
-//        $now = $time->format('U') * 1000;
-//        $seconds_since_completed = $now - $last_completed_at;
-//
-//        if($seconds_since_completed <= 0) {
-//            $seconds_since_completed = 1;
-//        }
-//        $total = (10 ** 15) / $seconds_since_completed;
-//
-//        return $total / ($this->priority->toInt() ** 2);
-//    }
 }
 
 
