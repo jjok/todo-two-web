@@ -85,12 +85,8 @@ final class AllTasks implements \JsonSerializable
                 $task['lastCompletedAt'] === null ? null : \DateTimeImmutable::createFromFormat('U', (string) $task['lastCompletedAt']),
                 $task['priority']
             )->toString(),
-//                    'lastCompleted' => array(
-//                        'at' => $task['lastCompletedAt'],
-//                        'by' => $task['lastCompletedBy'],
-//                    ),
             'lastCompletedAt' => $task['lastCompletedAt'],
-            'lastCompletedBy' => $task['lastCompletedBy'],
+//            'lastCompletedBy' => $task['lastCompletedBy'],
         );
     }
 }
