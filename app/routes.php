@@ -6,6 +6,7 @@ use jjok\TodoTwo\Domain\ProjectionBuildingEventStore;
 use jjok\TodoTwo\Domain\Task\Commands\CompleteTask;
 use jjok\TodoTwo\Domain\Task\Commands\CreateTask;
 use jjok\TodoTwo\Domain\Task\Query\GetById as GetTaskById;
+use jjok\TodoTwo\Domain\User\Query\GetUserById;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -110,10 +111,11 @@ $injector = require __DIR__ . '/dependencies.php';
 
 $eventStore = $injector->make(ProjectionBuildingEventStore::class);
 $getTaskById = $injector->make(GetTaskById::class);
+$getUserById = $injector->make(GetUserById::class);
 $allTasks = $injector->make(AllTasks::class);
 
 
-return function (App $app) use ($eventStore, $allTasks, $getTaskById) {
+return function (App $app) use ($eventStore, $allTasks, $getTaskById, $getUserById) {
 //    $container = $app->getContainer();
 
 //    $app->get('/', function (Request $request, Response $response) {
@@ -162,14 +164,17 @@ return function (App $app) use ($eventStore, $allTasks, $getTaskById) {
         return $response;
     });
 
-    $app->post('/tasks/{id}/complete', function(Request $request, Response $response) use ($eventStore, $getTaskById) {
+    $app->post('/tasks/{id}/complete', function(Request $request, Response $response) use ($eventStore, $getTaskById, $getUserById) {
 
-        $completeTask = new CompleteTask($eventStore, $getTaskById);
+        $completeTask = new CompleteTask($eventStore, $getTaskById, $getUserById);
 
         $body = json_decode((string) $request->getBody(), true);
 
         try {
-            $completeTask->execute((string) $request->getAttribute('id'), (string) $body['by']);
+            $completeTask->execute(
+                \jjok\TodoTwo\Domain\Task\Id::fromString($request->getAttribute('id')),
+                \jjok\TodoTwo\Domain\User\Id::fromString($body['user'])
+            );
         }
         catch (Throwable $e) {
             //TODO Error response

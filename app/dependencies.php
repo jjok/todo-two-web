@@ -74,4 +74,10 @@ $injector->delegate(ProjectionBuildingEventStore::class, function(Auryn\Injector
     );
 });
 
+$injector->delegate(\jjok\TodoTwo\Domain\User\Query\GetUserById::class, function () {
+    return new \jjok\TodoTwo\Infrastructure\InMemory\GetUserById(
+        new \jjok\TodoTwo\Domain\User(\jjok\TodoTwo\Domain\User\Id::fromString('00e0c19f-f5bc-4718-b368-d157bb3a98c5'), 'Jonathan')
+    );
+});
+
 return $injector;

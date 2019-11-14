@@ -74,7 +74,7 @@ final class ApiTest extends TestCase
 
         $time1 = time();
         $response = $this->app->handle(
-            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e9', 'Jonathan')
+            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e9', '00e0c19f-f5bc-4718-b368-d157bb3a98c5')
         );
 
         $this->assertSame(200, $response->getStatusCode());
@@ -97,7 +97,7 @@ final class ApiTest extends TestCase
 
         $time2 = time();
         $response = $this->app->handle(
-            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e8', 'Someone Else')
+            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e8', '00e0c19f-f5bc-4718-b368-d157bb3a98c5')
         );
 
         $this->assertSame(200, $response->getStatusCode());
@@ -161,7 +161,7 @@ final class ApiTest extends TestCase
     {
         $request = $this->createRequest('POST', sprintf('/tasks/%s/complete', $id));
         $request = $request->withHeader('Content-Type', 'application/json');
-        $request->getBody()->write(json_encode(array('by' => $userName)));
+        $request->getBody()->write(json_encode(array('user' => $userName)));
 
         return $request;
     }
