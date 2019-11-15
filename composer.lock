@@ -120,12 +120,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jjok/todo-two.git",
-                "reference": "d420ca52b2c6c971a7ca447f1ddf650510cee947"
+                "reference": "b4499208a69455a7b5596ac902558bf1cb911e43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jjok/todo-two/zipball/d420ca52b2c6c971a7ca447f1ddf650510cee947",
-                "reference": "d420ca52b2c6c971a7ca447f1ddf650510cee947",
+                "url": "https://api.github.com/repos/jjok/todo-two/zipball/b4499208a69455a7b5596ac902558bf1cb911e43",
+                "reference": "b4499208a69455a7b5596ac902558bf1cb911e43",
                 "shasum": ""
             },
             "require": {
@@ -152,7 +152,7 @@
                 "source": "https://github.com/jjok/todo-two/tree/master",
                 "issues": "https://github.com/jjok/todo-two/issues"
             },
-            "time": "2019-11-14T00:15:49+00:00"
+            "time": "2019-11-15T00:18:51+00:00"
         },
         {
             "name": "monolog/monolog",
