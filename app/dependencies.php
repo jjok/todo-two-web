@@ -64,6 +64,7 @@ $injector->defineParam('filename', $dataDir . 'tasks.json');
 $injector->share(\jjok\TodoTwo\Domain\EventStream::class);
 $injector->share(\jjok\TodoTwo\Domain\EventStore::class);
 
+$injector->alias(\jjok\TodoTwo\Domain\EventStore::class, ProjectionBuildingEventStore::class);
 $injector->alias(\jjok\TodoTwo\Domain\EventStream::class, \jjok\TodoTwo\Infrastructure\File\EventStream::class);
 $injector->alias(\jjok\TodoTwo\Domain\Task\Projections\AllTasksStorage::class, AllTasksStorage::class);
 

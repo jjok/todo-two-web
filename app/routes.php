@@ -3,7 +3,6 @@
 //use App\Application\Actions\User\ListUsersAction;
 //use App\Application\Actions\User\ViewUserAction;
 use jjok\TodoTwo\Domain\ProjectionBuildingEventStore;
-use jjok\TodoTwo\Domain\Task\Commands\CompleteTask;
 use jjok\TodoTwo\Domain\Task\Commands\CreateTask;
 use jjok\TodoTwo\Domain\Task\Query\GetById as GetTaskById;
 use jjok\TodoTwo\Domain\User\Query\GetUserById;
@@ -11,45 +10,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 //use Slim\Interfaces\RouteCollectorProxyInterface as Group;
-
-final class CreateTaskRequest
-{
-    public static function fromPsr7(Request $request) : self
-    {
-        $body = json_decode((string) $request->getBody(), true);
-
-        return new self(
-            (string) $request->getAttribute('id'),
-            (string) $body['name'],
-            (int) $body['priority']
-        );
-    }
-
-    private function __construct(string $id, string $name, int $priority)
-    {
-        $this->id = $id;
-        $this->name = $name;
-        $this->priority = $priority;
-    }
-
-    private $id, $name, $priority;
-
-    public function id() : string
-    {
-        return $this->id;
-    }
-
-    public function name() : string
-    {
-        return $this->name;
-    }
-
-    public function priority() : int
-    {
-        return $this->priority;
-    }
-}
-
 
 final class AllTasks implements \JsonSerializable
 {
@@ -115,7 +75,7 @@ $getUserById = $injector->make(GetUserById::class);
 $allTasks = $injector->make(AllTasks::class);
 
 
-return function (App $app) use ($eventStore, $allTasks, $getTaskById, $getUserById) {
+return function (App $app) use ($injector, $eventStore, $allTasks, $getTaskById, $getUserById) {
 //    $container = $app->getContainer();
 
 //    $app->get('/', function (Request $request, Response $response) {
@@ -133,7 +93,7 @@ return function (App $app) use ($eventStore, $allTasks, $getTaskById, $getUserBy
 //        try {
             $createTask = new CreateTask($eventStore);
 
-            $createTaskRequest = CreateTaskRequest::fromPsr7($request);
+            $createTaskRequest = \App\CreateTaskRequest::fromPsr7($request);
 
             $createTask->execute($createTaskRequest->id(), $createTaskRequest->name(), $createTaskRequest->priority());
 
@@ -164,25 +124,7 @@ return function (App $app) use ($eventStore, $allTasks, $getTaskById, $getUserBy
         return $response;
     });
 
-    $app->post('/tasks/{id}/complete', function(Request $request, Response $response) use ($eventStore, $getTaskById, $getUserById) {
-
-        $completeTask = new CompleteTask($eventStore, $getTaskById, $getUserById);
-
-        $body = json_decode((string) $request->getBody(), true);
-
-        try {
-            $completeTask->execute(
-                \jjok\TodoTwo\Domain\Task\Id::fromString($request->getAttribute('id')),
-                \jjok\TodoTwo\Domain\User\Id::fromString($body['user'])
-            );
-        }
-        catch (Throwable $e) {
-            //TODO Error response
-            $response = $response->withStatus(500);
-        }
-
-        return $response;
-    });
+    $app->post('/tasks/{id}/complete', $injector->make(\App\CompleteTaskHandler::class));
 
 //    $app->group('/users', function (Group $group) use ($container) {
 //        $group->get('', ListUsersAction::class);
