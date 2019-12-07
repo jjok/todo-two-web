@@ -27,10 +27,10 @@
 //};
 
 
+use jjok\TodoTwo\Domain;
 use jjok\TodoTwo\Domain\ProjectionBuildingEventStore;
 use jjok\TodoTwo\Domain\Task\Projections\AllTasksProjector;
-use jjok\TodoTwo\Infrastructure\File\AllTasksStorage;
-use jjok\TodoTwo\Infrastructure\File\EventStore;
+use jjok\TodoTwo\Infrastructure;
 
 function dataDir(string $env) : string {
     if($env === 'hassio') {
@@ -57,28 +57,36 @@ $dataDir = dataDir((string) getenv('APP_ENV'));
 $eventStoreFile = $injector->make(\SplFileObject::class);
 
 $allTasksProjectionFileName = $dataDir . 'tasks.json';
+$optionsFileName = $dataDir . 'options.json';
 
 
-$injector->defineParam('filename', $dataDir . 'tasks.json');
+$injector->defineParam('filename', $allTasksProjectionFileName);
 
-$injector->share(\jjok\TodoTwo\Domain\EventStream::class);
-$injector->share(\jjok\TodoTwo\Domain\EventStore::class);
+$injector->share(Domain\EventStream::class);
+$injector->share(Domain\EventStore::class);
 
-$injector->alias(\jjok\TodoTwo\Domain\EventStore::class, ProjectionBuildingEventStore::class);
-$injector->alias(\jjok\TodoTwo\Domain\EventStream::class, \jjok\TodoTwo\Infrastructure\File\EventStream::class);
-$injector->alias(\jjok\TodoTwo\Domain\Task\Projections\AllTasksStorage::class, AllTasksStorage::class);
+$injector->alias(Domain\EventStore::class, ProjectionBuildingEventStore::class);
+$injector->alias(Domain\EventStream::class, Infrastructure\File\EventStream::class);
+$injector->alias(Domain\Task\Projections\AllTasksStorage::class, Infrastructure\File\AllTasksStorage::class);
 
 $injector->delegate(ProjectionBuildingEventStore::class, function(Auryn\Injector $injector) use ($eventStoreFile, $allTasksProjectionFileName) {
     return new ProjectionBuildingEventStore(
-        new EventStore($eventStoreFile),
-        new AllTasksProjector(new AllTasksStorage($allTasksProjectionFileName))
+        new Infrastructure\File\EventStore($eventStoreFile),
+        new AllTasksProjector(new Infrastructure\File\AllTasksStorage($allTasksProjectionFileName))
     );
 });
 
-$injector->delegate(\jjok\TodoTwo\Domain\User\Query\GetUserById::class, function () {
-    return new \jjok\TodoTwo\Infrastructure\InMemory\GetUserById(
-        new \jjok\TodoTwo\Domain\User(\jjok\TodoTwo\Domain\User\Id::fromString('00e0c19f-f5bc-4718-b368-d157bb3a98c5'), 'Jonathan')
-    );
+$injector->delegate(Domain\User\Query\GetUserById::class, function () use ($optionsFileName) {
+    $optionsJson = file_get_contents($optionsFileName);
+    $options = json_decode($optionsJson, true);
+    $users = array_map(function(array $user) : Domain\User {
+        return new Domain\User(
+            Domain\User\Id::fromString($user['id']),
+            $user['name']
+        );
+    }, $options['users']);
+
+    return new Infrastructure\InMemory\GetUserById(...$users);
 });
 
 return $injector;

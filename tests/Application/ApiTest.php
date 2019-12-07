@@ -20,12 +20,6 @@ final class ApiTest extends TestCase
 
         $routes = require __DIR__ . '/../../app/routes.php';
         $routes($this->app);
-
-//        touch(__DIR__ . '/../data/events.dat');
-//        touch(__DIR__ . '/../data/tasks.json');
-//
-//        file_put_contents(__DIR__ . '/../data/events.dat', '');
-//        file_put_contents(__DIR__ . '/../data/tasks.json', '');
     }
 
     private $app;
@@ -74,7 +68,7 @@ final class ApiTest extends TestCase
 
         $time1 = time();
         $response = $this->app->handle(
-            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e9', '00e0c19f-f5bc-4718-b368-d157bb3a98c5')
+            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e9', '12345678-1234-5678-1234-1234567890ab')
         );
 
         $this->assertSame(200, $response->getStatusCode());
@@ -97,7 +91,7 @@ final class ApiTest extends TestCase
 
         $time2 = time();
         $response = $this->app->handle(
-            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e8', '00e0c19f-f5bc-4718-b368-d157bb3a98c5')
+            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e8', '12345678-1234-5678-1234-1234567890ab')
         );
 
         $this->assertSame(200, $response->getStatusCode());
@@ -157,11 +151,11 @@ final class ApiTest extends TestCase
         return $request;
     }
 
-    private function completeTaskRequest(string $id, string $userName) : Request
+    private function completeTaskRequest(string $taskId, string $userId) : Request
     {
-        $request = $this->createRequest('POST', sprintf('/tasks/%s/complete', $id));
+        $request = $this->createRequest('POST', sprintf('/tasks/%s/complete', $taskId));
         $request = $request->withHeader('Content-Type', 'application/json');
-        $request->getBody()->write(json_encode(array('user' => $userName)));
+        $request->getBody()->write(json_encode(array('user' => $userId)));
 
         return $request;
     }
