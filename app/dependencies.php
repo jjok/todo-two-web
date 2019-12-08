@@ -76,17 +76,15 @@ $injector->delegate(ProjectionBuildingEventStore::class, function(Auryn\Injector
     );
 });
 
-$injector->delegate(Domain\User\Query\GetUserById::class, function () use ($optionsFileName) {
-    $optionsJson = file_get_contents($optionsFileName);
-    $options = json_decode($optionsJson, true);
-    $users = array_map(function(array $user) : Domain\User {
-        return new Domain\User(
-            Domain\User\Id::fromString($user['id']),
-            $user['name']
-        );
-    }, $options['users']);
+$injector->delegate(App\Application\Users::class, static function() use ($optionsFileName) {
+    return \App\Application\Users::fromJson($optionsFileName);
+});
 
-    return new Infrastructure\InMemory\GetUserById(...$users);
+$injector->delegate(Domain\User\Query\GetUserById::class, function (\Auryn\Injector $injector) use ($optionsFileName) {
+//    $users = $injector->make(App\Application\Users::class);
+    $users = \App\Application\Users::fromJson($optionsFileName);
+
+    return new Infrastructure\InMemory\GetUserById(...$users->all());
 });
 
 return $injector;

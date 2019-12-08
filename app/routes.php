@@ -71,4 +71,6 @@ return function (App $app) use ($injector, $eventStore, $allTasks, $getTaskById,
 //        $group->get('', ListUsersAction::class);
 //        $group->get('/{id}', ViewUserAction::class);
 //    });
+
+    $app->get('/users', $injector->make(\App\ListUsersHandler::class));
 };
