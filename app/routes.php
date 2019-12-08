@@ -1,7 +1,5 @@
 <?php declare(strict_types=1);
 
-//use App\Application\Actions\User\ListUsersAction;
-//use App\Application\Actions\User\ViewUserAction;
 use jjok\TodoTwo\Domain\ProjectionBuildingEventStore;
 use jjok\TodoTwo\Domain\Task\Commands\CreateTask;
 use jjok\TodoTwo\Domain\Task\Query\GetById as GetTaskById;
@@ -9,70 +7,13 @@ use jjok\TodoTwo\Domain\User\Query\GetUserById;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
-//use Slim\Interfaces\RouteCollectorProxyInterface as Group;
-
-final class AllTasks implements \JsonSerializable
-{
-    public  function __construct(
-        jjok\TodoTwo\Domain\Task\Projections\AllTasksStorage $projection,
-        \App\Domain\PriorityCalculator $priorityCalculator,
-        DateTimeImmutable $now
-    ) {
-        $this->projection = $projection;
-        $this->priorityCalculator = $priorityCalculator;
-        $this->now = $now;
-    }
-
-    private $projection, $priorityCalculator, $now;
-
-    public function jsonSerialize() : array
-    {
-        $tasks = array_map(
-            [$this, 'formatTask'],
-            array_values($this->projection->load())
-        );
-
-        usort($tasks, static function(array $a, array $b) : int {
-            return $a['currentPriorityValue'] <=> $b['currentPriorityValue'];
-        });
-
-        return array(
-            'data' => array_map(static function(array $task) : array {
-                unset($task['currentPriorityValue']);
-
-                return $task;
-            }, $tasks),
-        );
-    }
-
-    private function formatTask(array $task) : array
-    {
-        $calculatedPriority = $this->priorityCalculator->priorityAt(
-            $this->now,
-            $task['lastCompletedAt'] === null ? null : \DateTimeImmutable::createFromFormat('U', (string) $task['lastCompletedAt']),
-            $task['priority']
-        );
-
-        return array(
-            'id' => $task['id'],
-            'name' => $task['name'],
-            'priority' => $task['priority'],
-            'currentPriority' => $calculatedPriority->toString(),
-            'currentPriorityValue' => $calculatedPriority->toFloat(),
-            'lastCompletedAt' => $task['lastCompletedAt'],
-//            'lastCompletedBy' => $task['lastCompletedBy'],
-        );
-    }
-}
-
-
 
 $injector = require __DIR__ . '/dependencies.php';
 
 $eventStore = $injector->make(ProjectionBuildingEventStore::class);
 $getTaskById = $injector->make(GetTaskById::class);
 $getUserById = $injector->make(GetUserById::class);
-$allTasks = $injector->make(AllTasks::class);
+$allTasks = $injector->make(\App\Application\AllTasks::class);
 
 
 return function (App $app) use ($injector, $eventStore, $allTasks, $getTaskById, $getUserById) {
