@@ -7,4 +7,4 @@ Run:
 
 Test:
 
-    ./vendor/bin/phpunit --filter ApiTest
+    ./vendor/bin/phpunit

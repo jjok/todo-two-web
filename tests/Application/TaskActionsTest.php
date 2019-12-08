@@ -8,7 +8,7 @@ use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Uri;
 
-final class ApiTest extends TestCase
+final class TaskActionsTest extends TestCase
 {
     public function setUp()
     {

@@ -32,15 +32,18 @@ use jjok\TodoTwo\Domain\ProjectionBuildingEventStore;
 use jjok\TodoTwo\Domain\Task\Projections\AllTasksProjector;
 use jjok\TodoTwo\Infrastructure;
 
-function dataDir(string $env) : string {
-    if($env === 'hassio') {
-        return '/data/';
-    }
-    if($env === 'test') {
-        return __DIR__ . '/../tests/data/';
-    }
+//FIXME Just did this to get the tests working
+if(!function_exists('dataDir')) {
+    function dataDir(string $env) : string {
+        if($env === 'hassio') {
+            return '/data/';
+        }
+        if($env === 'test') {
+            return __DIR__ . '/../tests/data/';
+        }
 
-    return __DIR__ . '/../data/';
+        return __DIR__ . '/../data/';
+    }
 }
 
 $injector = new Auryn\Injector();
