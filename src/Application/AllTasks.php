@@ -27,13 +27,17 @@ final class AllTasks implements \JsonSerializable
             array_values($this->projection->load())
         );
 
+        $tasks = array_filter($tasks, static function(array $task) : bool {
+            return !$task['isArchived'];
+        });
+
         usort($tasks, static function(array $a, array $b) : int {
             return $a['currentPriorityValue'] <=> $b['currentPriorityValue'];
         });
 
         return array(
             'data' => array_map(static function(array $task) : array {
-                unset($task['currentPriorityValue']);
+                unset($task['currentPriorityValue'], $task['isArchived']);
 
                 return $task;
             }, $tasks),
@@ -56,6 +60,7 @@ final class AllTasks implements \JsonSerializable
             'currentPriorityValue' => $calculatedPriority->toFloat(),
             'lastCompletedAt' => $task['lastCompletedAt'],
 //            'lastCompletedBy' => $task['lastCompletedBy'],
+            'isArchived' => $task['isArchived'],
         );
     }
 }
