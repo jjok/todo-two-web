@@ -67,6 +67,8 @@ return function (App $app) use ($injector, $eventStore, $allTasks, $getTaskById,
 
     $app->post('/tasks/{id}/complete', $injector->make(\App\CompleteTaskHandler::class));
 
+    $app->post('/tasks/{id}/archive', $injector->make(\App\ArchiveTaskHandler::class));
+
 //    $app->group('/users', function (Group $group) use ($container) {
 //        $group->get('', ListUsersAction::class);
 //        $group->get('/{id}', ViewUserAction::class);

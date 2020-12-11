@@ -67,11 +67,7 @@ final class TaskActionsTest extends TestCase
         )]);
 
         $time1 = time();
-        $response = $this->app->handle(
-            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e9', '12345678-1234-5678-1234-1234567890ab')
-        );
-
-        $this->assertSame(200, $response->getStatusCode());
+        $this->completeTask('2c17bd45-d905-45cb-803a-d392735d40e9', '12345678-1234-5678-1234-1234567890ab');
 
         $this->assertTasksEqual([array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
@@ -90,11 +86,7 @@ final class TaskActionsTest extends TestCase
         )]);
 
         $time2 = time();
-        $response = $this->app->handle(
-            $this->completeTaskRequest('2c17bd45-d905-45cb-803a-d392735d40e8', '12345678-1234-5678-1234-1234567890ab')
-        );
-
-        $this->assertSame(200, $response->getStatusCode());
+        $this->completeTask('2c17bd45-d905-45cb-803a-d392735d40e8', '12345678-1234-5678-1234-1234567890ab');
 
         $this->assertTasksEqual([array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
@@ -111,6 +103,16 @@ final class TaskActionsTest extends TestCase
             'lastCompletedAt' => $time2, //FIXME Dubious
 //            'lastCompletedBy' => 'Someone Else',
         )]);
+
+        $this->archiveTask('2c17bd45-d905-45cb-803a-d392735d40e8');
+
+        $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
+            'name' => 'New task 2',
+            'priority' => 60,
+            'currentPriority' => 'low',
+            'lastCompletedAt' => $time1,
+        )]);
     }
 
     private function createTask(string $id, string $name, int $priority) : void
@@ -118,7 +120,25 @@ final class TaskActionsTest extends TestCase
         $response = $this->app->handle(
             $this->createTaskRequest($id, $name, $priority)
         );
-        $this->assertSame(201, $response->getStatusCode());
+        self::assertSame(201, $response->getStatusCode());
+    }
+
+    private function completeTask(string $taskId, string $userId) : void
+    {
+        $response = $this->app->handle(
+            $this->completeTaskRequest($taskId, $userId)
+        );
+
+        self::assertSame(200, $response->getStatusCode());
+    }
+
+    private function archiveTask(string $taskId) : void
+    {
+        $response = $this->app->handle(
+            $this->archiveTaskRequest($taskId)
+        );
+
+        self::assertSame(200, $response->getStatusCode());
     }
 
     private function assertTasksEqual(array $expectedTasks) : void
@@ -131,14 +151,14 @@ final class TaskActionsTest extends TestCase
 
         $actualTasks = $responseBody['data'];
 
-        $this->assertCount(count($expectedTasks), $actualTasks);
+        self::assertCount(count($expectedTasks), $actualTasks);
         foreach ($actualTasks as $n => $task) {
-            $this->assertSame($expectedTasks[$n]['id']      , $task['id']);
-            $this->assertSame($expectedTasks[$n]['name']    , $task['name']);
-            $this->assertSame($expectedTasks[$n]['priority'], $task['priority']);
-            $this->assertSame($expectedTasks[$n]['currentPriority'], $task['currentPriority']);
-            $this->assertSame($expectedTasks[$n]['lastCompletedAt'], $task['lastCompletedAt']);
-//            $this->assertSame($expectedTasks[$n]['lastCompletedBy'], $task['lastCompletedBy']);
+            self::assertSame($expectedTasks[$n]['id']      , $task['id']);
+            self::assertSame($expectedTasks[$n]['name']    , $task['name']);
+            self::assertSame($expectedTasks[$n]['priority'], $task['priority']);
+            self::assertSame($expectedTasks[$n]['currentPriority'], $task['currentPriority']);
+            self::assertSame($expectedTasks[$n]['lastCompletedAt'], $task['lastCompletedAt']);
+//            self::assertSame($expectedTasks[$n]['lastCompletedBy'], $task['lastCompletedBy']);
         }
     }
 
@@ -156,6 +176,14 @@ final class TaskActionsTest extends TestCase
         $request = $this->createRequest('POST', sprintf('/tasks/%s/complete', $taskId));
         $request = $request->withHeader('Content-Type', 'application/json');
         $request->getBody()->write(json_encode(array('user' => $userId)));
+
+        return $request;
+    }
+
+    private function archiveTaskRequest(string $taskId) : Request
+    {
+        $request = $this->createRequest('POST', sprintf('/tasks/%s/archive', $taskId));
+        $request = $request->withHeader('Content-Type', 'application/json');
 
         return $request;
     }
