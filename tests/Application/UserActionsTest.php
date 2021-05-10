@@ -12,7 +12,7 @@ use Slim\Psr7\Uri;
 
 final class UserActionsTest extends TestCase
 {
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
@@ -47,10 +47,10 @@ final class UserActionsTest extends TestCase
 
         $actualUsers = $responseBody['data'];
 
-        $this->assertCount(count($expectedUsers), $actualUsers);
+        self::assertCount(count($expectedUsers), $actualUsers);
         foreach ($actualUsers as $n => $user) {
-            $this->assertSame($expectedUsers[$n]['id']      , $user['id']);
-            $this->assertSame($expectedUsers[$n]['name']    , $user['name']);
+            self::assertSame($expectedUsers[$n]['id']      , $user['id']);
+            self::assertSame($expectedUsers[$n]['name']    , $user['name']);
         }
     }
 

@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\App as SlimApp;
 use Slim\Factory\AppFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
@@ -10,7 +11,7 @@ use Slim\Psr7\Uri;
 
 final class TaskActionsTest extends TestCase
 {
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
@@ -22,9 +23,9 @@ final class TaskActionsTest extends TestCase
         $routes($this->app);
     }
 
-    private $app;
+    private SlimApp $app;
 
-    public function tearDown()
+    public function tearDown() : void
     {
         unlink(__DIR__ . '/../data/events.dat');
         unlink(__DIR__ . '/../data/tasks.json');
