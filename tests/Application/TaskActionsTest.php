@@ -34,7 +34,7 @@ final class TaskActionsTest extends TestCase
     }
 
     /** @test */
-    public function everything_works_ok() : void
+    public function tasks_can_be_added() : void
     {
         $this->assertTasksEqual([]);
 
@@ -46,7 +46,6 @@ final class TaskActionsTest extends TestCase
             'priority' => 50,
             'currentPriority' => 'high',
             'lastCompletedAt' => null,
-//            'lastCompletedBy' => null,
         )]);
 
         $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e9', 'New task 2', 60);
@@ -66,6 +65,39 @@ final class TaskActionsTest extends TestCase
             'lastCompletedAt' => null,
 //            'lastCompletedBy' => null,
         )]);
+
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e7', 'New task 3', 10);
+
+        $this->assertTasksEqual([ array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
+            'name' => 'New task 2',
+            'priority' => 60,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+//            'lastCompletedBy' => null,
+        ), array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'New task',
+            'priority' => 50,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+//            'lastCompletedBy' => null,
+        ), array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e7',
+            'name' => 'New task 3',
+            'priority' => 10,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+//            'lastCompletedBy' => null,
+        )]);
+    }
+
+
+    /** @test */
+    public function tasks_can_be_completed() : void
+    {
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e8', 'New task', 50);
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e9', 'New task 2', 60);
 
         $time1 = time();
         $this->completeTask('2c17bd45-d905-45cb-803a-d392735d40e9', '12345678-1234-5678-1234-1234567890ab');
@@ -105,15 +137,45 @@ final class TaskActionsTest extends TestCase
 //            'lastCompletedBy' => 'Someone Else',
         )]);
 
-        $this->archiveTask('2c17bd45-d905-45cb-803a-d392735d40e8');
+        $time3 = time();
+        $this->completeTask('2c17bd45-d905-45cb-803a-d392735d40e9', '12345678-1234-5678-1234-1234567890ab');
 
         $this->assertTasksEqual([array(
             'id' => '2c17bd45-d905-45cb-803a-d392735d40e9',
             'name' => 'New task 2',
             'priority' => 60,
             'currentPriority' => 'low',
-            'lastCompletedAt' => $time1,
+            'lastCompletedAt' => $time3, //FIXME Dubious
+//            'lastCompletedBy' => 'Jonathan',
+        ), array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'New task',
+            'priority' => 50,
+            'currentPriority' => 'low',
+            'lastCompletedAt' => $time2, //FIXME Dubious
+//            'lastCompletedBy' => 'Someone Else',
         )]);
+    }
+
+    /** @test */
+    public function a_task_can_be_archived() : void
+    {
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e1', 'New task 1', 50);
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e2', 'New task 2', 60);
+
+        $this->archiveTask('2c17bd45-d905-45cb-803a-d392735d40e1');
+
+        $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e2',
+            'name' => 'New task 2',
+            'priority' => 60,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+        )]);
+
+        $this->archiveTask('2c17bd45-d905-45cb-803a-d392735d40e2');
+
+        $this->assertTasksEqual([]);
     }
 
     private function createTask(string $id, string $name, int $priority) : void
