@@ -178,6 +178,84 @@ final class TaskActionsTest extends TestCase
         $this->assertTasksEqual([]);
     }
 
+    /** @test */
+    public function a_task_can_be_renamed() : void
+    {
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e8', 'New task', 50);
+
+        $this->updateTaskName('2c17bd45-d905-45cb-803a-d392735d40e8', 'New task UPDATED');
+
+        $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'New task UPDATED',
+            'priority' => 50,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+        )]);
+
+        $this->updateTaskName('2c17bd45-d905-45cb-803a-d392735d40e8', 'New task UPDATED AGAIN!');
+
+        $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'New task UPDATED AGAIN!',
+            'priority' => 50,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+        )]);
+    }
+
+    /** @test */
+    public function a_task_can_have_its_priority_changed() : void
+    {
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e8', 'New task', 50);
+
+        $this->updateTaskPriority('2c17bd45-d905-45cb-803a-d392735d40e8', 30);
+
+        $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'New task',
+            'priority' => 30,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+        )]);
+
+        $this->updateTaskPriority('2c17bd45-d905-45cb-803a-d392735d40e8', 75);
+
+        $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'New task',
+            'priority' => 75,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+        )]);
+    }
+
+    /** @test */
+    public function a_task_can_have_both_name_and_priority_changed_together() : void
+    {
+        $this->createTask('2c17bd45-d905-45cb-803a-d392735d40e8', 'New task', 50);
+
+        $this->updateTask('2c17bd45-d905-45cb-803a-d392735d40e8', 'Different name', 1);
+
+        $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'Different name',
+            'priority' => 1,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+        )]);
+
+        $this->updateTask('2c17bd45-d905-45cb-803a-d392735d40e8', 'Something else', 99);
+
+        $this->assertTasksEqual([array(
+            'id' => '2c17bd45-d905-45cb-803a-d392735d40e8',
+            'name' => 'Something else',
+            'priority' => 99,
+            'currentPriority' => 'high',
+            'lastCompletedAt' => null,
+        )]);
+    }
+
     private function createTask(string $id, string $name, int $priority) : void
     {
         $response = $this->app->handle(
@@ -202,6 +280,40 @@ final class TaskActionsTest extends TestCase
         );
 
         self::assertSame(200, $response->getStatusCode());
+    }
+
+    private function updateTask(string $taskId, string $newName, int $newPriority) : void
+    {
+        $response = $this->app->handle(
+            $this->updateTaskRequest($taskId, array(
+                'name' => $newName,
+                'priority' => $newPriority,
+            ))
+        );
+
+        self::assertSame(204, $response->getStatusCode());
+    }
+
+    private function updateTaskName(string $taskId, string $newName) : void
+    {
+        $response = $this->app->handle(
+            $this->updateTaskRequest($taskId, array(
+                'name' => $newName,
+            ))
+        );
+
+        self::assertSame(204, $response->getStatusCode());
+    }
+
+    private function updateTaskPriority(string $taskId, int $newPriority) : void
+    {
+        $response = $this->app->handle(
+            $this->updateTaskRequest($taskId, array(
+                'priority' => $newPriority,
+            ))
+        );
+
+        self::assertSame(204, $response->getStatusCode());
     }
 
     private function assertTasksEqual(array $expectedTasks) : void
@@ -251,6 +363,14 @@ final class TaskActionsTest extends TestCase
         return $request;
     }
 
+    private function updateTaskRequest(string $taskId, array $body) : Request
+    {
+        $request = $this->createRequest('PATCH', sprintf('/tasks/%s', $taskId));
+        $request = $request->withHeader('Content-Type', 'application/json');
+        $request->getBody()->write(json_encode($body, JSON_THROW_ON_ERROR));
+
+        return $request;
+    }
     private function createRequest(
         string $method,
         string $path,

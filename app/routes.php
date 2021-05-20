@@ -48,22 +48,7 @@ return function (App $app) use ($injector, $eventStore, $allTasks, $getTaskById,
         return $response;
     });
 
-    $app->patch('/tasks/{id}', function(Request $request, Response $response) use ($eventStore, $getTaskById) {
-        try {
-//            $renameTask = new RenameTask($eventStore, $getTaskById);
-////            $changeTaskPriority = new ChangeTaskPriority($eventStore, $getTaskById);
-//
-//            $renameTaskRequest = RenameTaskRequest::fromPsr7($request);
-//
-//            $renameTask->execute($renameTaskRequest->id(), $renameTaskRequest->newName());
-        }
-        catch (Throwable $e) {
-            //TODO Error response
-            $response = $response->withStatus(500);
-        }
-
-        return $response;
-    });
+    $app->patch('/tasks/{id}', $injector->make(\App\UpdateTaskHandler::class));
 
     $app->post('/tasks/{id}/complete', $injector->make(\App\CompleteTaskHandler::class));
 
