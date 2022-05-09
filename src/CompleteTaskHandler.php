@@ -8,12 +8,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 final class CompleteTaskHandler
 {
-    public function __construct(CompleteTask $completeTask)
-    {
-        $this->command = $completeTask;
-    }
-
-    private $command;
+    public function __construct(
+        private CompleteTask $command
+    ) {}
 
     public function __invoke(Request $request, Response $response) : Response
     {

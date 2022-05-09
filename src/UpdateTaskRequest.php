@@ -17,16 +17,11 @@ final class UpdateTaskRequest
         return new self($id, $name, $priority);
     }
 
-    private function __construct(string $id, ?string $maybeName, ?int $maybePriority)
-    {
-        $this->id = $id;
-        $this->maybeName = $maybeName;
-        $this->maybePriority = $maybePriority;
-    }
-
-    private string $id;
-    private ?string $maybeName;
-    private ?int $maybePriority;
+    private function __construct(
+        private string $id,
+        private ?string $maybeName,
+        private ?int $maybePriority
+    ) {}
 
     public function id() : string
     {

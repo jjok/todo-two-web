@@ -10,14 +10,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 final class UpdateTaskHandler
 {
-    public function __construct(ChangeTaskPriority $changeTaskPriority, RenameTask $renameTask)
-    {
-        $this->changeTaskPriority = $changeTaskPriority;
-        $this->renameTask = $renameTask;
-    }
-
-    private $changeTaskPriority;
-    private $renameTask;
+    public function __construct(
+        private ChangeTaskPriority $changeTaskPriority,
+        private RenameTask $renameTask
+    ) {}
 
     public function __invoke(Request $request, Response $response) : Response
     {

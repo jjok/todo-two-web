@@ -10,14 +10,12 @@ final class CompleteTaskRequest
 {
     public static function fromPsr7(Request $psr7request) : self
     {
-        $request = new self();
-        $request->request = $psr7request;
-
-        return $request;
+        return new self($psr7request);
     }
 
-    /** @var Request */
-    private $request;
+    private function __construct(
+        private Request $request
+    ) {}
 
     public function taskId() : TaskId
     {

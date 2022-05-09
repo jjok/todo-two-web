@@ -17,14 +17,11 @@ final class CreateTaskRequest
         );
     }
 
-    private function __construct(string $id, string $name, int $priority)
-    {
-        $this->id = $id;
-        $this->name = $name;
-        $this->priority = $priority;
-    }
-
-    private $id, $name, $priority;
+    private function __construct(
+        private string $id,
+        private string $name,
+        private int $priority
+    ) {}
 
     public function id() : string
     {

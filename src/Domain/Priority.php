@@ -9,12 +9,9 @@ final class Priority
         return new self($value);
     }
 
-    public function __construct(float $value)
-    {
-        $this->value = $value;
-    }
-
-    private $value;
+    private function __construct(
+        private float $value
+    ) {}
 
     public function toFloat() : float
     {

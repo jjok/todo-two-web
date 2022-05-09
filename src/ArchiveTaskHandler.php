@@ -8,12 +8,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 final class ArchiveTaskHandler
 {
-    public function __construct(ArchiveTask $archiveTask)
-    {
-        $this->command = $archiveTask;
-    }
-
-    private $command;
+    public function __construct(
+        private ArchiveTask $command
+    ) {}
 
     public function __invoke(Request $request, Response $response) : Response
     {

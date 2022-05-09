@@ -9,12 +9,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 final class ListUsersHandler
 {
-    public function __construct(Users $users)
-    {
-        $this->users = $users;
-    }
-
-    private $users;
+    public function __construct(
+        private Users $users
+    ) {}
 
     public function __invoke(Request $request, Response $response): Response
     {
